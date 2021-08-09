@@ -7,13 +7,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='py-itime',
-    version='0.0.1',
+    version='0.0.2',
     author='Avins Wang',
     author_email='avinswang@gmail.com',
-    url='https://github.com/AvinsWang/itime',
+    url='https://github.com/AvinsWang/py-itime',
     download_url="http://pypi.python.org/pypi/py-itime/",
-    description="Chained call time handlers",
-    long_description=open(os.path.join(here, 'ReadMed.rst')).read(),
+    description="Time package supporting chain call",
+    long_description=open(os.path.join(here, 'ReadMe.rst')).read(),
     license='LGPL-3.0',
     install_requires=[],
     packages=find_packages(),
@@ -24,8 +24,6 @@ setup(
                  'Natural Language :: English',
                  'Operating System :: OS Independent',
                  'Intended Audience :: Developers',
-                 'Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
-                 'Programming Language :: Python :: 2.5',
                  'Programming Language :: Python :: 3.6'],
 )
