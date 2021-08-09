@@ -1,3 +1,4 @@
+import warnings
 from datetime import datetime, timedelta
 
 
@@ -47,7 +48,7 @@ class iTime:
             except Exception:
                 pass
         if _dt is None:
-            raise TypeError(f"iTime input format wrong, expected {', '.join(fmt_list)}")
+            raise TypeError(f"iTime input format wrong, expected [{', '.join(fmt_list)}], got: {str_}")
         self.dt = _dt
 
     def _from_uts(self, uts_, is_ms):
@@ -55,7 +56,11 @@ class iTime:
         data = uts_
         if is_ms:
             data /= 1000.
-        _dt = datetime.fromtimestamp(data)
+        try:
+            _dt = datetime.fromtimestamp(data)
+        except ValueError:
+            _dt = datetime.fromtimestamp(data / 1000.)
+            warnings.warn(f"iTime init from millisecond unix timestamp should specified is_ms=True.")
         self.dt = _dt
 
     def _from_dt(self, dt):
@@ -116,6 +121,7 @@ class iTime:
         return _new_itime(_today + _floor)
 
     def get_date(self):
+        """2021-08-01 12:12:00 -> 2021-08-01 00:00:00(iTime)"""
         return _new_itime(self.date_str())
 
     @staticmethod
