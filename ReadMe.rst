@@ -16,7 +16,7 @@ Example
 
 ::
 
-    # get time str of previous day with specified hours
+    # get datetime str of previous day with specified hours
     >>> iTime(f'{iTime.now().delta(days=-1).date_str()} 10:00:00').time_str()
     '2021-07-20 10:00:00'
 
@@ -24,20 +24,20 @@ Example
     >>> iTime.now().delta(days=-1).uts(is_ms=True)
     1627211818635
 
-    # get corresponding unix timestamp with specified time str
+    # get corresponding unix timestamp with specified datetime str
     >>> iTime('2021-07-20 10:00:00').uts()
     1626746400
 
-    # get time str of UTC time which is converted and down sampled by local time
-    >>> iTime.now().delta(hours=-8).ds(minutes=5).time_str()
+    # get datetime str of UTC time which is converted and down sampled by local time
+    >>> iTime.now().delta(hours=-8).ds(minutes=5).datetime_str()
     '2021-08-02 08:20:00'
 
 Initialize
 ----------
-There are 4 ways to initialize an iTime object.
+There are 5 ways to initialize an iTime object.
 ::
 
-    # 1. init with time str, format '%Y{}%m{}%d', '%Y{}%m{}%d %H:%M:%S' delimiter could be '','-','/'.
+    # 1. init with time str, format '%Y{}%m{}%d', '%Y{}%m{}%d %H{}%M{}%S' date_sep could be '','-','/', time_sep could be '',':'.
     >>> iTime('20210701')
     >>> iTime('2021-07-01 00:00:01')
     >>> iTime('2021/07/01 00:00:01')
@@ -47,12 +47,16 @@ There are 4 ways to initialize an iTime object.
     >>> iTime(1625068800000, is_ms=True)    # if is milliseconds, is_ms=True
     >>> iTime(1625068800.123)               # float is also supported
 
-    # 3. init with custom time str, use iTime.strp(time: str, fmt: str)
+    # 3. init with custom datetime str, use iTime.strp(time: str, fmt: str)
     >>> iTime('2021-07-01 12:05', fmt='%Y-%m-%d %H:%M')
 
-    # 4. init datetime.datetime instance
+    # 4. init datetime.datetime object
     >>> dt = datetime.datetime.now()
     >>> iTime(dt)
+
+    # 5. init with timetuple
+    >>> iTime((2021, 7, 1, 0, 0, 1))
+    >>> iTime(['2021', '07', '01', '00', '00', '01'])
 
 
 class iTime
@@ -67,10 +71,23 @@ class iTime
     init iTime from custom time str format.
 * iTime.uts(is_ms=False) -> int
     get unix timestamp, if is_ms=True, get milliseconds.
-* iTime.date_str(deli='-') -> str
-    get date str, deli is delimiter include '', '-', '/'.
-* time_str(deli='-') -> str
-    get time str, deli is delimiter include '', '-', '/'.
+* iTime.date_str(date_sep='-') -> str
+    get date str, sep include '', '-', '/'.
+* time_str(time_sep=':') -> str
+    get time str, 'time_sep' is sep include '', ':'.
+* datetime_str(date_sep='-', time_sep=':') -> str
+    get datetime str, date_sep and time_sep same to above.
+* join(datetime_str: str, fmt: str) -> iTime
+    join iTime self with given time str.
+    Notice: There is no date or time range checking, be careful
+
+::
+
+    >>> iTime('2021-08-01 12:12:00').join('10:00:00')
+    iTime('2021-08-01 10:00:00')
+    >>> iTime('2021-08-01 12:12:00').join('09', '%m')
+    iTime('2021-09-01 10:00:00')
+
 * strf(fmt) -> str
     get custom time str with given fmt.
 * pop() -> datetime.datetime
