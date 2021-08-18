@@ -143,33 +143,28 @@ class iTime:
 
     def ds(self, hours=None, minutes=None, seconds=None):
         """down sample time
-        Examples:
-        it = iTime('2021-07-21 23:23:12')
-        >>> it.ds(hours=5)
-        '2021-07-21 20:00:00'
-        >>> it.ds(hours=23)
-        '2021-07-21 23:00:00'
-        >>> it.ds(minutes=5)
-        '2021-07-21 23:20:00'
-        >>> it.ds(seconds=5)
+        >>> iTime('2021-07-21 23:23:12').ds(hours=5).__str__()
+        '2021-07-21 20:23:12'
+        >>> iTime('2021-07-21 23:23:12').ds(hours=22).__str__()
+        '2021-07-21 22:23:12'
+        >>> iTime('2021-07-21 23:23:12').ds(minutes=5).__str__()
+        '2021-07-21 23:20:12'
+        >>> iTime('2021-07-21 23:23:12').ds(seconds=5).__str__()
         '2021-07-21 23:23:10'
+        >>> iTime('2021-07-21 23:23:12').ds(hours=23, minutes=5, seconds=5).__str__()
+        '2021-07-21 23:20:10'
         """
-        _today = self.today().uts()
-        _diff = self.uts() - _today
-        _div = 0
+        tm_list = list(self._dt.timetuple())[:6]
         if hours is not None:
             assert 1 <= hours <= 24
-            _div += 3600 * hours
+            tm_list[3] = tm_list[3] // hours * hours
         if minutes is not None:
             assert 1 <= minutes <= 60
-            _div += 60 * minutes
+            tm_list[4] = tm_list[4] // minutes * minutes
         if seconds is not None:
             assert 1 <= seconds <= 60
-            _div += seconds
-        if _div == 0:
-            raise Exception('iTime floor unmodified input.')
-        _floor = _diff // _div * _div
-        return _new_itime(_today + _floor)
+            tm_list[5] = tm_list[5] // seconds * seconds
+        return _new_itime(tm_list)
 
     def get_date(self):
         """2021-08-01 12:12:00 -> 2021-08-01 00:00:00(iTime)"""
@@ -178,10 +173,10 @@ class iTime:
     def join(self, time_str: str, fmt='%H:%M:%S'):
         """Join iTime self with given time str
         Notice: There is no date or time range checking, be careful
-        >>> iTime('2021-08-01 12:12:00').join('10:00:00')
-        iTime('2021-08-01 10:00:00')
-        >>> iTime('2021-08-01 12:12:00').join('09', '%m')
-        iTime('2021-09-01 10:00:00')
+        >>> iTime('2021-08-01 12:12:00').join('10:00:00').__str__()
+        '2021-08-01 10:00:00'
+        >>> iTime('2021-08-01 12:12:00').join('09', '%m').__str__()
+        '2021-09-01 12:12:00'
         """
         src_dt_list = re.split(r'[- :]', self.datetime_str())
         dst_dt_list = re.split(r'[- :]', iTime.strp(time_str, fmt).datetime_str())
@@ -213,5 +208,5 @@ __all__ = ['iTime']
 
 
 if __name__ == '__main__':
-    x = iTime.now().join('09', '%m')
-    print(x)
+    import doctest
+    doctest.testmod()
