@@ -34,9 +34,9 @@ def _get_fmt(d_sep, t_sep, default_fmt):
         fmt = _FMT_DICT[f'{head}{d_sep}{t_sep}']
     except Exception:
         fmt = default_fmt
-        warnings.warn(f"Time format date_sep excepted {_DEF_DATE_SEPS}, got '{d_sep}';"
-                      f" time_sep excepted {_DEF_TIME_SEPS}, got '{t_sep}',"
-                      f" use default '{fmt}', just use iTime.strf() get format time want.")
+        warnings.warn(f"Time format date_sep excepted {_DEF_DATE_SEPS}, got '{d_sep}'; "
+                      f"time_sep excepted {_DEF_TIME_SEPS}, got '{t_sep}', "
+                      f"use default '{fmt}', just use iTime.strf() get format time want.")
     return fmt
 
 
@@ -73,6 +73,18 @@ class iTime:
         "%Y{}%m{}%d", "%Y{}%m{}%d %H:%M:%S" sep in ['','-','/'],
         other formats for example %Y-%m, %Y-%m-%d %H:%M etc should be
         inited with staticmethod iTime.strp()
+        >>> iTime('2021-04-04').__str__()
+        '2021-04-04 00:00:00'
+        >>> iTime('2021-04-04 182312').__str__()
+        '2021-04-04 18:23:12'
+        >>> iTime('2021/04/04').__str__()
+        '2021-04-04 00:00:00'
+        >>> iTime('2021/04/04 18:23:12').__str__()
+        '2021-04-04 18:23:12'
+        >>> iTime('20210404').__str__()
+        '2021-04-04 00:00:00'
+        >>> iTime('20210404 18:23:12').__str__()
+        '2021-04-04 18:23:12'
         """
         _dt = None
         for _fmt in _FMT_LIST:
@@ -87,7 +99,15 @@ class iTime:
         self._dt = _dt
 
     def _from_uts(self, uts_, is_ms):
-        """Init from unix timestamp"""
+        """Init from unix timestamp
+        init with unix timestamp
+        >>> iTime(1617531792).__str__()
+        '2021-04-04 18:23:12'
+        >>> iTime(1617531792000, is_ms=True).__str__()    # if is milliseconds, is_ms=True
+        '2021-04-04 18:23:12'
+        >>> iTime(1617531792.123).__str__()               # float is also supported
+        '2021-04-04 18:23:12'
+        """
         data = uts_
         if is_ms:
             data /= 1000.
@@ -117,6 +137,14 @@ class iTime:
             return int(_uts)
 
     def date_str(self, date_sep='-'):
+        """
+        >>> iTime('2021-04-04 18:23:12').date_str()
+        '2021-04-04'
+        >>> iTime('2021-04-04 18:23:12').date_str('')
+        '20210404'
+        >>> iTime('2021-04-04 18:23:12').date_str('/')
+        '2021/04/04'
+        """
         fmt = _get_fmt(d_sep=date_sep, t_sep=None, default_fmt=_FMT_DICT.get('d-'))
         return self._dt.strftime(fmt)
 
@@ -138,21 +166,23 @@ class iTime:
         return self.datetime_str()
 
     def delta(self, days=0, seconds=0, minutes=0, hours=0):
+        """
+        >>> iTime('2021-04-04 18:23:12').delta(hours=1, minutes=30, seconds=10).__str__()
+        '2021-04-04 19:53:22'
+        """
         _dt = self._dt + timedelta(days=days, seconds=seconds, minutes=minutes, hours=hours)
         return _new_itime(_dt)
 
     def ds(self, hours=None, minutes=None, seconds=None):
         """down sample time
-        >>> iTime('2021-07-21 23:23:12').ds(hours=5).__str__()
-        '2021-07-21 20:23:12'
-        >>> iTime('2021-07-21 23:23:12').ds(hours=22).__str__()
-        '2021-07-21 22:23:12'
-        >>> iTime('2021-07-21 23:23:12').ds(minutes=5).__str__()
-        '2021-07-21 23:20:12'
-        >>> iTime('2021-07-21 23:23:12').ds(seconds=5).__str__()
-        '2021-07-21 23:23:10'
-        >>> iTime('2021-07-21 23:23:12').ds(hours=23, minutes=5, seconds=5).__str__()
-        '2021-07-21 23:20:10'
+        >>> iTime('2021-04-04 18:23:12').ds(hours=5).__str__()
+        '2021-04-04 15:23:12'
+        >>> iTime('2021-04-04 18:23:12').ds(minutes=5).__str__()
+        '2021-04-04 18:20:12'
+        >>> iTime('2021-04-04 18:23:12').ds(seconds=5).__str__()
+        '2021-04-04 18:23:10'
+        >>> iTime('2021-04-04 18:23:12').ds(hours=17, minutes=5, seconds=5).__str__()
+        '2021-04-04 17:20:10'
         """
         tm_list = list(self._dt.timetuple())[:6]
         if hours is not None:
@@ -167,16 +197,21 @@ class iTime:
         return _new_itime(tm_list)
 
     def get_date(self):
-        """2021-08-01 12:12:00 -> 2021-08-01 00:00:00(iTime)"""
+        """2021-04-04 18:23:12 -> 2021-04-04 00:00:00(iTime)
+        >>> iTime('2021-04-04 18:23:12').get_date().__str__()
+        '2021-04-04 00:00:00'
+        """
         return _new_itime(self.date_str())
 
     def join(self, time_str: str, fmt='%H:%M:%S'):
         """Join iTime self with given time str
         Notice: There is no date or time range checking, be careful
-        >>> iTime('2021-08-01 12:12:00').join('10:00:00').__str__()
-        '2021-08-01 10:00:00'
-        >>> iTime('2021-08-01 12:12:00').join('09', '%m').__str__()
-        '2021-09-01 12:12:00'
+        >>> iTime('2021-04-04 18:23:12').join('23:59:59').__str__()
+        '2021-04-04 23:59:59'
+        >>> iTime('2021-04-04 23:59:59').join('10 235959', fmt='%d %H%M%S').__str__()
+        '2021-04-10 23:59:59'
+        >>> iTime('2021-04-04 18:23:12').join('10', fmt='%d').__str__()
+        '2021-04-10 18:23:12'
         """
         src_dt_list = re.split(r'[- :]', self.datetime_str())
         dst_dt_list = re.split(r'[- :]', iTime.strp(time_str, fmt).datetime_str())
@@ -195,12 +230,16 @@ class iTime:
 
     @staticmethod
     def strp(d_str, fmt):
+        """
+        >>> iTime.strp('2021,04,04 18:23', fmt='%Y,%m,%d %H:%M').__str__()
+        '2021-04-04 18:23:00'
+        """
         _dt = datetime.strptime(d_str, fmt)
         return _new_itime(_dt)
 
 
 def _new_itime(data, is_ms=False):
-    """In order to construct new instance for some iTime method"""
+    """Return iTime obj for chaining calls"""
     return iTime(data, is_ms)
 
 
