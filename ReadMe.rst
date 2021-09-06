@@ -91,7 +91,6 @@ class iTime
     '2021-04-10 18:23:12'
 
 
-
 * strf(fmt) -> str
     get custom time str with given fmt.
 * pop() -> datetime.datetime
@@ -102,12 +101,15 @@ class iTime
     down sample time, example as follows.
 
 ::
-
     >>> iTime('2021-04-04 18:23:12').ds(hours=5).__str__()
     '2021-04-04 15:23:12'
     >>> iTime('2021-04-04 18:23:12').ds(minutes=5).__str__()
     '2021-04-04 18:20:12'
     >>> iTime('2021-04-04 18:23:12').ds(seconds=5).__str__()
     '2021-04-04 18:23:10'
+    >>> iTime('2021-04-04 18:23:12').ds(minutes=5, seconds=0).__str__()
+    '2021-04-04 18:20:00'
+    >>> iTime('2021-04-04 18:23:12').ds(hours=0, minutes=0, seconds=0).__str__()
+    '2021-04-04 00:00:00'
     >>> iTime('2021-04-04 18:23:12').ds(hours=17, minutes=5, seconds=5).__str__()
     '2021-04-04 17:20:10'

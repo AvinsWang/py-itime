@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='py-itime',
-    version='0.0.2',
+    version='0.0.4',
     author='Avins Wang',
     author_email='avinswang@gmail.com',
     url='https://github.com/AvinsWang/py-itime',
@@ -19,7 +19,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    keywords=['iTime'],
+    keywords=['py-itime', 'python time'],
     classifiers=['Topic :: Utilities', 
                  'Natural Language :: English',
                  'Operating System :: OS Independent',

@@ -181,19 +181,29 @@ class iTime:
         '2021-04-04 18:20:12'
         >>> iTime('2021-04-04 18:23:12').ds(seconds=5).__str__()
         '2021-04-04 18:23:10'
+        >>> iTime('2021-04-04 18:23:12').ds(minutes=5, seconds=0).__str__()
+        '2021-04-04 18:20:00'
+        >>> iTime('2021-04-04 18:23:12').ds(hours=0, minutes=0, seconds=0).__str__()
+        '2021-04-04 00:00:00'
         >>> iTime('2021-04-04 18:23:12').ds(hours=17, minutes=5, seconds=5).__str__()
         '2021-04-04 17:20:10'
         """
+        def _calc(src, time_unit):
+            if time_unit == 0:
+                return 0
+            else:
+                return src // time_unit * time_unit
+
         tm_list = list(self._dt.timetuple())[:6]
         if hours is not None:
-            assert 1 <= hours <= 24
-            tm_list[3] = tm_list[3] // hours * hours
+            assert 0 <= hours < 24
+            tm_list[3] = _calc(tm_list[3], hours)
         if minutes is not None:
-            assert 1 <= minutes <= 60
-            tm_list[4] = tm_list[4] // minutes * minutes
+            assert 0 <= minutes < 60
+            tm_list[4] = _calc(tm_list[4], minutes)
         if seconds is not None:
-            assert 1 <= seconds <= 60
-            tm_list[5] = tm_list[5] // seconds * seconds
+            assert 0 <= seconds < 60
+            tm_list[5] = _calc(tm_list[5], seconds)
         return _new_itime(tm_list)
 
     def get_date(self):
